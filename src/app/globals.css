@@ -1,0 +1,192 @@
+@import "tailwindcss";
+
+/*
+ * THE CRITERION — Design System
+ *
+ * Color palette sourced from theframework-v2.pdf Section 5f (Visual Layer Tiering):
+ *   Primary teal:   #01696F  — Quranic layer (verses, text-internal content)
+ *   Dark ink text:  #28251D  — from framework spec
+ *   Muted scholarly:#7A7974  — tradition-linked/secondary layer
+ *
+ * Warm paper-like surfaces from PRD design vision section.
+ */
+
+/* ─── Fonts ─────────────────────────────────────────────── */
+@layer base {
+  @font-face {
+    font-family: 'Amiri';
+    font-display: swap;
+  }
+}
+
+/* ─── CSS Custom Properties ─────────────────────────────── */
+:root {
+  /* Surfaces */
+  --background:          #FAF8F4;  /* warm parchment */
+  --surface:             #F4F1EB;  /* card/panel surface */
+  --surface-raised:      #EDEAE2;  /* elevated panel */
+  --border:              #E0DDD4;  /* subtle dividers */
+
+  /* Text */
+  --text-primary:        #28251D;  /* dark ink — framework spec */
+  --text-secondary:      #6B6760;  /* mid-tone */
+  --text-tertiary:       #9A9690;  /* soft/muted */
+
+  /* Brand — Quranic primary layer (framework spec #01696F) */
+  --teal:                #01696F;
+  --teal-light:          #E6F3F3;
+  --teal-dark:           #015558;
+
+  /* Scholarly muted layer (framework spec #7A7974) */
+  --muted:               #7A7974;
+  --muted-bg:            #F0EDE7;
+
+  /* Confidence/ambiguity signals */
+  --signal-clear:        #1D7A4A;  /* Clear in the text — green */
+  --signal-clear-bg:     #EAF4EE;
+  --signal-supported:    #01696F;  /* Well-supported — teal */
+  --signal-supported-bg: #E6F3F3;
+  --signal-debated:      #8B6914;  /* Debated — amber */
+  --signal-debated-bg:   #FBF3E0;
+  --signal-tradition:    #7A7974;  /* Tradition-dependent — muted */
+  --signal-tradition-bg: #F0EDE7;
+  --signal-ambiguous:    #B34A2E;  /* Ambiguous — terracotta */
+  --signal-ambiguous-bg: #FBF0ED;
+
+  /* Typography scale */
+  --font-arabic:         'Amiri', 'Noto Naskh Arabic', serif;
+  --font-body:           var(--font-geist-sans), system-ui, sans-serif;
+  --font-display:        var(--font-lora), 'Georgia', serif;
+
+  /* Spacing / radii */
+  --radius-sm:           6px;
+  --radius-md:           12px;
+  --radius-lg:           16px;
+  --radius-xl:           20px;
+}
+
+/* ─── Dark mode ──────────────────────────────────────────── */
+[data-theme="dark"] {
+  --background:          #1A1812;
+  --surface:             #23211B;
+  --surface-raised:      #2B2920;
+  --border:              #3A3830;
+
+  --text-primary:        #EDE9E0;
+  --text-secondary:      #A8A49A;
+  --text-tertiary:       #6B6760;
+
+  --teal:                #1A8B91;
+  --teal-light:          #0F2E2F;
+  --teal-dark:           #2AABB2;
+
+  --muted:               #8A8680;
+  --muted-bg:            #2A2820;
+
+  --signal-clear-bg:     #0E2A1C;
+  --signal-supported-bg: #0F2E2F;
+  --signal-debated-bg:   #2A230E;
+  --signal-tradition-bg: #2A2820;
+  --signal-ambiguous-bg: #2A1510;
+}
+
+/* ─── Base resets ────────────────────────────────────────── */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--text-primary);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  min-height: 100dvh;
+}
+
+/* ─── Arabic text rendering ──────────────────────────────── */
+.arabic {
+  font-family: var(--font-arabic);
+  direction: rtl;
+  text-align: right;
+  line-height: 2;
+  font-feature-settings: "liga" 1, "calt" 1;
+}
+
+.arabic-lg {
+  font-family: var(--font-arabic);
+  direction: rtl;
+  text-align: right;
+  line-height: 2.2;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+}
+
+.arabic-xl {
+  font-family: var(--font-arabic);
+  direction: rtl;
+  text-align: right;
+  line-height: 2.4;
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+}
+
+/* ─── Utility classes ────────────────────────────────────── */
+.surface {
+  background-color: var(--surface);
+}
+
+.surface-raised {
+  background-color: var(--surface-raised);
+}
+
+.border-default {
+  border-color: var(--border);
+}
+
+.text-quran {
+  color: var(--teal);
+}
+
+.text-scholarly {
+  color: var(--muted);
+}
+
+/* ─── Focus styles ───────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ─── Smooth transitions ─────────────────────────────────── */
+.transition-base {
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+
+/* ─── Scrollbar (subtle) ─────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
