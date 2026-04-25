@@ -1,103 +1,186 @@
 @import "tailwindcss";
 
 /*
- * THE CRITERION — Design System
+ * THE CRITERION — Design System v1.0
  *
- * Color palette sourced from theframework-v2.pdf Section 5f (Visual Layer Tiering):
- *   Primary teal:   #01696F  — Quranic layer (verses, text-internal content)
- *   Dark ink text:  #28251D  — from framework spec
- *   Muted scholarly:#7A7974  — tradition-linked/secondary layer
+ * Implements design.md specification.
+ * Three Latin voices: CursorGothic (display/UI), jjannon (editorial prose),
+ * berkeleyMono (technical metadata). Fourth: Amiri Quran (Quranic Arabic).
  *
- * Warm paper-like surfaces from PRD design vision section.
+ * Three semantic color palettes: surface, brand (teal), divergence.
+ * Kept categorically separate — color is never decorative.
  */
 
-/* ─── Fonts ─────────────────────────────────────────────── */
-@layer base {
-  @font-face {
-    font-family: 'Amiri';
-    font-display: swap;
-  }
-}
-
-/* ─── CSS Custom Properties ─────────────────────────────── */
+/* ─── Day mode tokens ─────────────────────────────────────── */
 :root {
-  /* Surfaces */
-  --background:          #FAF8F4;  /* warm parchment */
-  --surface:             #F4F1EB;  /* card/panel surface */
-  --surface-raised:      #EDEAE2;  /* elevated panel */
-  --border:              #E0DDD4;  /* subtle dividers */
+  /* Surface palette (quiet register) */
+  --surface-canvas:  #f2f1ed;
+  --surface-100:     #f7f7f4;
+  --surface-200:     #f2f1ed;
+  --surface-300:     #ebeae5;
+  --surface-400:     #e6e5e0;
+  --surface-500:     #e1e0db;
 
-  /* Text */
-  --text-primary:        #28251D;  /* dark ink — framework spec */
-  --text-secondary:      #6B6760;  /* mid-tone */
-  --text-tertiary:       #9A9690;  /* soft/muted */
+  /* Ink (text) */
+  --ink-primary:     #26251d;
+  --ink-secondary:   rgba(38, 37, 30, 0.72);
+  --ink-muted:       rgba(38, 37, 30, 0.55);
+  --ink-faint:       rgba(38, 37, 30, 0.35);
 
-  /* Brand — Quranic primary layer (framework spec #01696F) */
-  --teal:                #01696F;
-  --teal-light:          #E6F3F3;
-  --teal-dark:           #015558;
+  /* Brand — teal, used only for interactive affordances + Quranic graph layer */
+  --brand-primary:   #01696F;
+  --brand-hover:     #015057;
+  --brand-subtle:    rgba(1, 105, 111, 0.08);
+  --brand-border:    rgba(1, 105, 111, 0.25);
 
-  /* Scholarly muted layer (framework spec #7A7974) */
-  --muted:               #7A7974;
-  --muted-bg:            #F0EDE7;
+  /* Borders — perceptually uniform (oklab with rgba fallback) */
+  --border-subtle:   rgba(38, 37, 30, 0.08);
+  --border-default:  rgba(38, 37, 30, 0.15);
+  --border-strong:   rgba(38, 37, 30, 0.40);
 
-  /* Confidence/ambiguity signals */
-  --signal-clear:        #1D7A4A;  /* Clear in the text — green */
-  --signal-clear-bg:     #EAF4EE;
-  --signal-supported:    #01696F;  /* Well-supported — teal */
-  --signal-supported-bg: #E6F3F3;
-  --signal-debated:      #8B6914;  /* Debated — amber */
-  --signal-debated-bg:   #FBF3E0;
-  --signal-tradition:    #7A7974;  /* Tradition-dependent — muted */
-  --signal-tradition-bg: #F0EDE7;
-  --signal-ambiguous:    #B34A2E;  /* Ambiguous — terracotta */
-  --signal-ambiguous-bg: #FBF0ED;
+  /* Divergence palette — score outcomes only, never decorative */
+  --divergence-green:        #1f8a65;
+  --divergence-green-tint:   rgba(31, 138, 101, 0.10);
+  --divergence-yellow:       #c08532;
+  --divergence-yellow-tint:  rgba(192, 133, 50, 0.10);
+  --divergence-orange:       #cf6d2d;
+  --divergence-orange-tint:  rgba(207, 109, 45, 0.10);
+  --divergence-red:          #cf2d56;
+  --divergence-red-tint:     rgba(207, 45, 86, 0.10);
+  --divergence-gray:         rgba(38, 37, 30, 0.55);
+  --divergence-gray-tint:    rgba(38, 37, 30, 0.06);
 
-  /* Typography scale */
-  --font-arabic:         'Amiri', 'Noto Naskh Arabic', serif;
-  --font-body:           var(--font-geist-sans), system-ui, sans-serif;
-  --font-display:        var(--font-lora), 'Georgia', serif;
+  /* Evidential tier palette (T1–T7), ordered from deepest to most attenuated */
+  --tier-1: #01696F;
+  --tier-2: #0f7a6b;
+  --tier-3: #3a8761;
+  --tier-4: #6b8f4f;
+  --tier-5: #9c7a3a;
+  --tier-6: #a06340;
+  --tier-7: #8a4a4a;
 
-  /* Spacing / radii */
-  --radius-sm:           6px;
-  --radius-md:           12px;
-  --radius-lg:           16px;
-  --radius-xl:           20px;
+  /* ── Legacy aliases (used throughout existing components) ── */
+  --background:          var(--surface-canvas);
+  --surface:             var(--surface-400);
+  --surface-raised:      var(--surface-300);
+  --border:              var(--border-default);
+  --text-primary:        var(--ink-primary);
+  --text-secondary:      var(--ink-secondary);
+  --text-tertiary:       var(--ink-muted);
+  --teal:                var(--brand-primary);
+  --teal-light:          var(--brand-subtle);
+  --teal-dark:           var(--brand-hover);
+  --muted:               var(--ink-muted);
+  --muted-bg:            var(--surface-300);
+
+  /* Confidence signal aliases → divergence palette */
+  --signal-clear:            var(--divergence-green);
+  --signal-clear-bg:         var(--divergence-green-tint);
+  --signal-supported:        var(--brand-primary);
+  --signal-supported-bg:     var(--brand-subtle);
+  --signal-debated:          var(--divergence-yellow);
+  --signal-debated-bg:       var(--divergence-yellow-tint);
+  --signal-tradition:        var(--divergence-orange);
+  --signal-tradition-bg:     var(--divergence-orange-tint);
+  --signal-ambiguous:        var(--divergence-red);
+  --signal-ambiguous-bg:     var(--divergence-red-tint);
+
+  /* Typography — commercial fonts first, public fallbacks follow */
+  /* CursorGothic: compressed engineered sans for UI/display */
+  --font-display: "CursorGothic", var(--font-geist-sans), "Inter", system-ui, sans-serif;
+  /* jjannon: literary serif for editorial prose and sustained reading */
+  --font-body: "jjannon", var(--font-lora), "Lora", Georgia, ui-serif, serif;
+  /* berkeleyMono: technical metadata, verse refs, source IDs */
+  --font-mono: "berkeleyMono", "Berkeley Mono", var(--font-jetbrains-mono), "JetBrains Mono", ui-monospace, "Cascadia Code", Menlo, Consolas, monospace;
+  /* Amiri Quran: primary Quranic Arabic */
+  --font-arabic: "Amiri Quran", "Amiri", "Noto Naskh Arabic", "Traditional Arabic", serif;
+  --font-arabic-ui: "Noto Naskh Arabic", "Amiri", system-ui, serif;
+
+  /* Border-radius scale (design.md §7.4) */
+  --radius-micro:      1.5px;
+  --radius-small:      3px;
+  --radius-default:    6px;
+  --radius-comfortable: 8px;
+  --radius-featured:   12px;
+  --radius-pill:       9999px;
+
+  /* Legacy radius aliases */
+  --radius-sm: var(--radius-default);
+  --radius-md: var(--radius-featured);
+  --radius-lg: 16px;
+  --radius-xl: 20px;
 }
 
-/* ─── Dark mode ──────────────────────────────────────────── */
+/* ─── Night mode tokens ───────────────────────────────────── */
 [data-theme="dark"] {
-  --background:          #1A1812;
-  --surface:             #23211B;
-  --surface-raised:      #2B2920;
-  --border:              #3A3830;
+  --surface-canvas:  #1a1814;
+  --surface-100:     #221f1a;
+  --surface-200:     #1a1814;
+  --surface-300:     #252220;
+  --surface-400:     #2c2926;
+  --surface-500:     #33302d;
 
-  --text-primary:        #EDE9E0;
-  --text-secondary:      #A8A49A;
-  --text-tertiary:       #6B6760;
+  --ink-primary:     #e8e6e0;
+  --ink-secondary:   rgba(232, 230, 224, 0.78);
+  --ink-muted:       rgba(232, 230, 224, 0.62);
+  --ink-faint:       rgba(232, 230, 224, 0.42);
 
-  --teal:                #1A8B91;
-  --teal-light:          #0F2E2F;
-  --teal-dark:           #2AABB2;
+  --brand-primary:   #4ba5a8;
+  --brand-hover:     #5fb5b8;
+  --brand-subtle:    rgba(75, 165, 168, 0.12);
+  --brand-border:    rgba(75, 165, 168, 0.30);
 
-  --muted:               #8A8680;
-  --muted-bg:            #2A2820;
+  --border-subtle:   rgba(232, 230, 224, 0.08);
+  --border-default:  rgba(232, 230, 224, 0.15);
+  --border-strong:   rgba(232, 230, 224, 0.40);
 
-  --signal-clear-bg:     #0E2A1C;
-  --signal-supported-bg: #0F2E2F;
-  --signal-debated-bg:   #2A230E;
-  --signal-tradition-bg: #2A2820;
-  --signal-ambiguous-bg: #2A1510;
+  --divergence-green:        #5fc4a0;
+  --divergence-green-tint:   rgba(95, 196, 160, 0.14);
+  --divergence-yellow:       #e2a560;
+  --divergence-yellow-tint:  rgba(226, 165, 96, 0.14);
+  --divergence-orange:       #e89564;
+  --divergence-orange-tint:  rgba(232, 149, 100, 0.14);
+  --divergence-red:          #e96b8a;
+  --divergence-red-tint:     rgba(233, 107, 138, 0.14);
+  --divergence-gray:         rgba(232, 230, 224, 0.55);
+  --divergence-gray-tint:    rgba(232, 230, 224, 0.08);
+
+  --tier-1: #4ba5a8;
+  --tier-2: #62b69e;
+  --tier-3: #7cc090;
+  --tier-4: #9ec585;
+  --tier-5: #c5a570;
+  --tier-6: #cf9070;
+  --tier-7: #bd7a7a;
+
+  /* Night signal aliases */
+  --signal-clear:            var(--divergence-green);
+  --signal-clear-bg:         var(--divergence-green-tint);
+  --signal-supported:        var(--brand-primary);
+  --signal-supported-bg:     var(--brand-subtle);
+  --signal-debated:          var(--divergence-yellow);
+  --signal-debated-bg:       var(--divergence-yellow-tint);
+  --signal-tradition:        var(--divergence-orange);
+  --signal-tradition-bg:     var(--divergence-orange-tint);
+  --signal-ambiguous:        var(--divergence-red);
+  --signal-ambiguous-bg:     var(--divergence-red-tint);
+
+  --muted:               var(--ink-muted);
+  --muted-bg:            var(--surface-400);
+  --teal:                var(--brand-primary);
+  --teal-light:          var(--brand-subtle);
+  --teal-dark:           var(--brand-hover);
 }
 
-/* ─── Base resets ────────────────────────────────────────── */
+/* ─── Tailwind theme bridge ───────────────────────────────── */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--text-primary);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--surface-canvas);
+  --color-foreground: var(--ink-primary);
+  --font-sans: var(--font-display);
+  --font-mono: var(--font-mono);
 }
 
+/* ─── Base resets ────────────────────────────────────────────*/
 *,
 *::before,
 *::after {
@@ -110,9 +193,13 @@ html {
   text-rendering: optimizeLegibility;
 }
 
+/*
+ * Body uses the editorial serif (jjannon/Lora) as the default reading voice.
+ * UI chrome components (nav, buttons, labels) explicitly declare --font-display.
+ */
 body {
-  background-color: var(--background);
-  color: var(--text-primary);
+  background-color: var(--surface-canvas);
+  color: var(--ink-primary);
   font-family: var(--font-body);
   min-height: 100dvh;
 }
@@ -130,63 +217,96 @@ body {
   font-family: var(--font-arabic);
   direction: rtl;
   text-align: right;
-  line-height: 2.2;
-  font-size: clamp(1.5rem, 4vw, 2rem);
+  line-height: 2.0;
+  font-size: clamp(1.375rem, 4vw, 1.75rem); /* 22–28px per bilingual scale */
 }
 
 .arabic-xl {
   font-family: var(--font-arabic);
   direction: rtl;
   text-align: right;
-  line-height: 2.4;
-  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  line-height: 2.0;
+  font-size: clamp(1.5rem, 5vw, 2.25rem); /* 24–36px for reading surface */
+}
+
+/* ─── Typography classes ─────────────────────────────────── */
+
+/* Display / UI voice (CursorGothic) */
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Editorial prose voice (jjannon) */
+.font-editorial {
+  font-family: var(--font-body);
+  font-feature-settings: "cswh" 1;
+  line-height: 1.55;
+}
+
+/* Technical metadata voice (berkeleyMono) */
+.font-mono-ref {
+  font-family: var(--font-mono);
+  font-feature-settings: "tnum" 1;
+}
+
+/* Section micro-label (CursorGothic uppercase per design spec) */
+.label-micro {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+/* Verse reference in mono (berkeleyMono per design spec) */
+.verse-ref {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-feature-settings: "tnum" 1;
 }
 
 /* ─── Utility classes ────────────────────────────────────── */
 .surface {
-  background-color: var(--surface);
+  background-color: var(--surface-400);
 }
 
 .surface-raised {
-  background-color: var(--surface-raised);
-}
-
-.border-default {
-  border-color: var(--border);
+  background-color: var(--surface-300);
 }
 
 .text-quran {
-  color: var(--teal);
+  color: var(--brand-primary);
 }
 
 .text-scholarly {
-  color: var(--muted);
+  color: var(--ink-muted);
 }
 
-/* ─── Focus styles ───────────────────────────────────────── */
+/* ─── Focus styles (design.md §10.3) ─────────────────────── */
 :focus-visible {
-  outline: 2px solid var(--teal);
+  outline: 2px solid var(--brand-subtle);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: var(--radius-default);
 }
 
-/* ─── Smooth transitions ─────────────────────────────────── */
+/* ─── Motion (design.md §10.1 — restraint discipline) ────── */
+/* Only: 150ms color/opacity transitions. No slide, scale, bounce. */
 .transition-base {
-  transition: opacity 150ms ease, transform 150ms ease;
+  transition: opacity 150ms ease, color 150ms ease, background-color 150ms ease;
 }
 
-/* ─── Scrollbar (subtle) ─────────────────────────────────── */
+/* ─── Scrollbar ──────────────────────────────────────────── */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 4px;
+  height: 4px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 3px;
+  background: var(--border-default);
+  border-radius: var(--radius-pill);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-tertiary);
+  background: var(--ink-muted);
 }

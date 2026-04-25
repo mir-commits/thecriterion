@@ -1,15 +1,12 @@
 /**
  * EvidenceTierLabel
  *
- * Displays the evidence tier with a visual indicator distinguishing
- * Quranic (primary) layer from scholarly (secondary) layer.
+ * Implements the tier badge system from design.md §8.2.
+ * Seven tiers, each with its own color from the evidential palette (design.md §3.4).
+ * Tier 1 = deepest teal (Quran explains Quran). Tier 7 = most attenuated.
  *
- * Framework Section 5f Visual Layer Tiering:
- * - Primary layer (Tier 1): Quranic content — rendered in teal
- * - Secondary layer (Tiers 2–7): Scholarly/traditional — rendered in muted
- *
- * CLAUDE.md: "Every substantive answer should make its basis inspectable.
- * Users should be able to see whether support is text-internal or tradition-dependent."
+ * Pill shape, 20px height, berkeleyMono numeral, tint background.
+ * Never appears without source attribution (design.md §15 prohibitions).
  */
 
 import type { EvidenceTier } from "@/lib/types";
@@ -22,42 +19,44 @@ interface EvidenceTierLabelProps {
   className?: string;
 }
 
-/**
- * Visual layer assignment per framework Section 5f.
- * Tier 1 = Primary (Quranic). Tiers 2–7 = Secondary (scholarly).
- */
-function getTierLayer(tier: EvidenceTier): "primary" | "secondary" {
-  return tier === 1 ? "primary" : "secondary";
-}
-
 export function EvidenceTierLabel({
   tier,
   showDescription = false,
   className,
 }: EvidenceTierLabelProps) {
-  const layer = getTierLayer(tier);
+  const tierVar = `var(--tier-${tier})`;
 
   return (
     <div className={cn("flex flex-col gap-1", className)}>
+      {/* Tier badge — pill shape, 20px height, berkeleyMono per design spec */}
       <span
-        className="inline-flex items-center gap-1.5 text-xs font-medium"
-        style={{ color: layer === "primary" ? "var(--teal)" : "var(--muted)" }}
+        className="inline-flex items-center gap-1.5"
+        style={{ fontFamily: "var(--font-mono)" }}
       >
         <span
-          className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+          className="inline-flex items-center px-2 rounded-full border text-[11px] font-medium leading-5 h-5"
           style={{
-            backgroundColor: layer === "primary" ? "var(--teal)" : "var(--muted)",
+            backgroundColor: `color-mix(in srgb, ${tierVar} 10%, transparent)`,
+            borderColor: `color-mix(in srgb, ${tierVar} 25%, transparent)`,
+            color: tierVar,
+            fontFamily: "var(--font-mono)",
+            fontFeatureSettings: '"tnum" 1',
           }}
-          aria-hidden="true"
-        />
-        {layer === "primary" ? "Quran-internal" : "Scholarly tradition"}
-        <span className="opacity-50">— Tier {tier}</span>
+        >
+          T{tier}
+        </span>
+        <span
+          className="text-xs"
+          style={{ color: "var(--ink-muted)", fontFamily: "var(--font-display)" }}
+        >
+          {EVIDENCE_TIER_LABELS[tier]}
+        </span>
       </span>
 
       {showDescription && (
         <p
           className="text-xs leading-relaxed"
-          style={{ color: "var(--text-tertiary)" }}
+          style={{ color: "var(--ink-muted)", fontFamily: "var(--font-display)" }}
         >
           {EVIDENCE_TIER_DESCRIPTIONS[tier]}
         </p>
@@ -68,7 +67,7 @@ export function EvidenceTierLabel({
 
 /**
  * Compact inline evidence basis chip — used in answer cards.
- * Shows whether an answer is grounded in text-internal or tradition-dependent evidence.
+ * Signals whether an answer is grounded in text-internal or tradition-dependent evidence.
  */
 interface EvidenceBasisChipProps {
   basis: "text-internal" | "tradition-dependent" | "both";
@@ -76,31 +75,30 @@ interface EvidenceBasisChipProps {
 }
 
 export function EvidenceBasisChip({ basis, className }: EvidenceBasisChipProps) {
-  const isQuranInternal = basis === "text-internal";
+  const isInternal = basis === "text-internal";
   const isBoth = basis === "both";
+
+  const color = isInternal ? "var(--brand-primary)" : isBoth ? "var(--divergence-orange)" : "var(--ink-muted)";
+  const bg = isInternal ? "var(--brand-subtle)" : isBoth ? "var(--divergence-orange-tint)" : "var(--surface-300)";
+  const border = isInternal ? "var(--brand-border)" : isBoth ? "var(--divergence-orange-tint)" : "var(--border-subtle)";
 
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full",
+        "inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[11px] font-medium",
         className
       )}
       style={{
-        backgroundColor: isQuranInternal
-          ? "var(--teal-light)"
-          : isBoth
-          ? "var(--muted-bg)"
-          : "var(--muted-bg)",
-        color: isQuranInternal
-          ? "var(--teal)"
-          : "var(--muted)",
+        backgroundColor: bg,
+        color,
+        borderColor: border,
+        fontFamily: "var(--font-display)",
+        letterSpacing: "0.05px",
       }}
     >
       <span
-        className="w-1 h-1 rounded-full"
-        style={{
-          backgroundColor: isQuranInternal ? "var(--teal)" : "var(--muted)",
-        }}
+        className="w-1 h-1 rounded-full flex-shrink-0"
+        style={{ backgroundColor: color }}
         aria-hidden="true"
       />
       {basis === "text-internal"

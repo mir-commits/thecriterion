@@ -62,17 +62,21 @@ export function BottomNav() {
               href={href}
               className={cn(
                 "flex flex-col items-center justify-center gap-1 flex-1 py-2 px-1 min-h-[56px]",
-                "transition-colors text-[10px] font-medium tracking-wide uppercase",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1"
+                "transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1"
               )}
               style={{
-                color: isActive ? "var(--teal)" : "var(--text-tertiary)",
+                color: isActive ? "var(--brand-primary)" : "var(--ink-muted)",
+                fontFamily: "var(--font-display)",
+                fontSize: "10px",
+                fontWeight: 600,
+                letterSpacing: "0.5px",
+                textTransform: "uppercase",
               }}
               aria-current={isActive ? "page" : undefined}
             >
               <Icon
                 size={20}
-                strokeWidth={isActive ? 2.5 : 1.75}
+                weight={isActive ? "bold" : "regular"}
               />
               <span>{label}</span>
             </Link>

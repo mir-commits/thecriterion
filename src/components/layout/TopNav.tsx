@@ -57,21 +57,27 @@ export function TopNav({
             className="flex items-center gap-2"
             aria-label="The Criterion — Home"
           >
+            {/* Wordmark: "criterion." — CursorGothic 600 lowercase, design.md §12.2 */}
             <span
-              className="text-sm font-semibold tracking-wide"
-              style={{ color: "var(--teal)", fontFamily: "var(--font-display)" }}
+              className="font-semibold"
+              style={{
+                color: "var(--ink-primary)",
+                fontFamily: "var(--font-display)",
+                fontSize: "22px",
+                letterSpacing: "-0.088px",
+              }}
             >
-              المعيار
+              criterion<span style={{ color: "var(--ink-primary)" }}>.</span>
             </span>
           </Link>
         )}
       </div>
 
-      {/* Center: title */}
+      {/* Center: wordmark or title — CursorGothic per design.md §12.2 */}
       {title && (
         <h1
           className="text-sm font-medium truncate max-w-[50%] text-center"
-          style={{ color: "var(--text-primary)" }}
+          style={{ color: "var(--ink-primary)", fontFamily: "var(--font-display)" }}
         >
           {title}
         </h1>

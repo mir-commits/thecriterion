@@ -1,17 +1,12 @@
 /**
  * ConfidenceBadge
  *
- * Displays a confidence signal as a visual badge with optional tooltip.
+ * Implements design.md §8.3 (confidence bars) and the divergence palette §3.3.
+ * Confidence is rendered as a small horizontal bar (not a color badge) to avoid
+ * competing with tier colors on the same evidence row.
  *
- * DESIGN PRINCIPLES (CLAUDE.md):
- * - Must never imply theological certainty
- * - "Clear in the text" != "divinely authorized"
- * - Plain language only — no raw scores exposed
- * - Ambiguity should feel informative, not alarming
- * - Never let scoring become the emotional center of the product
- *
- * The badge uses color and text to communicate evidence quality.
- * Hovering/tapping reveals the full explanation.
+ * The expandable description panel uses the divergence-band tint background.
+ * Never implies theological certainty — describes evidence quality only.
  */
 
 "use client";
@@ -28,37 +23,24 @@ interface ConfidenceBadgeProps {
   className?: string;
 }
 
-const BAND_STYLES: Record<ConfidenceBand, { bg: string; text: string; border: string }> = {
-  "high": {
-    bg: "var(--signal-clear-bg)",
-    text: "var(--signal-clear)",
-    border: "var(--signal-clear)",
-  },
-  "medium-high": {
-    bg: "var(--signal-supported-bg)",
-    text: "var(--signal-supported)",
-    border: "var(--signal-supported)",
-  },
-  "medium": {
-    bg: "var(--signal-debated-bg)",
-    text: "var(--signal-debated)",
-    border: "var(--signal-debated)",
-  },
-  "low-medium": {
-    bg: "var(--signal-tradition-bg)",
-    text: "var(--signal-tradition)",
-    border: "var(--signal-tradition)",
-  },
-  "low": {
-    bg: "var(--signal-ambiguous-bg)",
-    text: "var(--signal-ambiguous)",
-    border: "var(--signal-ambiguous)",
-  },
-  "uncertain": {
-    bg: "var(--signal-ambiguous-bg)",
-    text: "var(--signal-ambiguous)",
-    border: "var(--signal-ambiguous)",
-  },
+/* Divergence palette mapping per design.md §3.3 */
+const BAND_COLORS: Record<ConfidenceBand, { fill: string; tint: string }> = {
+  "high":        { fill: "var(--divergence-green)",  tint: "var(--divergence-green-tint)" },
+  "medium-high": { fill: "var(--brand-primary)",     tint: "var(--brand-subtle)" },
+  "medium":      { fill: "var(--divergence-yellow)", tint: "var(--divergence-yellow-tint)" },
+  "low-medium":  { fill: "var(--divergence-orange)", tint: "var(--divergence-orange-tint)" },
+  "low":         { fill: "var(--divergence-red)",    tint: "var(--divergence-red-tint)" },
+  "uncertain":   { fill: "var(--divergence-gray)",   tint: "var(--divergence-gray-tint)" },
+};
+
+/* Confidence band → fractional fill (0–1) for the bar indicator */
+const BAND_FILL: Record<ConfidenceBand, number> = {
+  "high":        0.95,
+  "medium-high": 0.78,
+  "medium":      0.58,
+  "low-medium":  0.40,
+  "low":         0.25,
+  "uncertain":   0.12,
 };
 
 export function ConfidenceBadge({
@@ -68,70 +50,90 @@ export function ConfidenceBadge({
   className,
 }: ConfidenceBadgeProps) {
   const [expanded, setExpanded] = useState(false);
-  const styles = BAND_STYLES[signal.band];
+  const { fill, tint } = BAND_COLORS[signal.band];
+  const barFill = BAND_FILL[signal.band];
 
   return (
     <div className={cn("flex flex-col gap-2", className)}>
-      {/* Badge */}
+      {/* Label row */}
       <button
         onClick={() => setExpanded(!expanded)}
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-full border transition-opacity",
-          size === "sm" ? "px-2.5 py-1 text-xs" : "px-3 py-1.5 text-sm",
-          "font-medium cursor-pointer hover:opacity-80"
+          "inline-flex items-center gap-2 transition-opacity hover:opacity-80 cursor-pointer",
+          size === "sm" ? "text-xs" : "text-sm"
         )}
-        style={{
-          backgroundColor: styles.bg,
-          color: styles.text,
-          borderColor: `${styles.border}40`,
-        }}
+        style={{ fontFamily: "var(--font-display)", color: "var(--ink-primary)" }}
         aria-expanded={expanded}
         aria-label={`Evidence quality: ${signal.label}. Tap for explanation.`}
       >
+        {/* Confidence bar — per design.md §8.3 */}
         <span
-          className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-          style={{ backgroundColor: styles.text }}
+          className="relative flex-shrink-0 rounded-full overflow-hidden"
+          style={{
+            width: size === "sm" ? 40 : 56,
+            height: 4,
+            backgroundColor: "var(--border-default)",
+          }}
           aria-hidden="true"
-        />
-        {signal.label}
-        <Info size={12} className="flex-shrink-0 opacity-60" />
+        >
+          <span
+            className="absolute inset-y-0 left-0 rounded-full"
+            style={{
+              width: `${barFill * 100}%`,
+              backgroundColor: fill,
+              transition: "width 200ms ease",
+            }}
+          />
+        </span>
+
+        <span style={{ color: fill }}>{signal.label}</span>
+        <Info size={12} className="flex-shrink-0" style={{ color: "var(--ink-muted)" }} />
       </button>
 
-      {/* Ikhtilaf indicator — when there is scholarly disagreement */}
+      {/* Ikhtilaf indicator */}
       {signal.ikhtilafFlag && (
         <span
-          className="inline-flex items-center gap-1 text-xs font-medium"
-          style={{ color: "var(--signal-debated)" }}
+          className="inline-flex items-center gap-1 text-xs"
+          style={{ color: "var(--divergence-yellow)", fontFamily: "var(--font-display)" }}
         >
-          <span className="text-[10px]">⚖</span>
+          <span className="text-[10px]" aria-hidden="true">⚖</span>
           Scholarly disagreement exists on this
         </span>
       )}
 
-      {/* Expandable description — shows on tap/click */}
+      {/* Expandable description panel — divergence-tint background */}
       {(expanded || showDescription) && (
         <div
-          className="text-xs leading-relaxed p-3 rounded-lg border"
+          className="text-xs leading-relaxed p-3 rounded-[8px] border"
           style={{
-            backgroundColor: styles.bg,
-            color: "var(--text-secondary)",
-            borderColor: `${styles.border}30`,
+            backgroundColor: tint,
+            color: "var(--ink-secondary)",
+            borderColor: `color-mix(in srgb, ${fill} 20%, transparent)`,
+            borderLeftWidth: "3px",
+            borderLeftColor: fill,
+            fontFamily: "var(--font-body)",
           }}
         >
-          <p className="mb-1 font-medium" style={{ color: styles.text }}>
-            What does &ldquo;{signal.label}&rdquo; mean?
+          <p
+            className="mb-1 font-medium text-[11px] uppercase tracking-wider"
+            style={{ color: fill, fontFamily: "var(--font-display)", letterSpacing: "0.5px" }}
+          >
+            {signal.label}
           </p>
           <p>{signal.description}</p>
           {signal.ikhtilafNote && (
             <p className="mt-2 pt-2 border-t border-current/20">
-              <span className="font-medium">Note on disagreement: </span>
+              <span className="font-medium" style={{ fontFamily: "var(--font-display)" }}>
+                Note on disagreement:{" "}
+              </span>
               {signal.ikhtilafNote}
             </p>
           )}
-          {/* TREC flag — text requests external clarification */}
           {signal.twoPass.trecFlag && (
             <p className="mt-2 pt-2 border-t border-current/20">
-              <span className="font-medium">Note: </span>
+              <span className="font-medium" style={{ fontFamily: "var(--font-display)" }}>
+                Note:{" "}
+              </span>
               The Quranic text itself points to Prophetic explanation for this
               passage. Reading the text alone is not sufficient here.
             </p>

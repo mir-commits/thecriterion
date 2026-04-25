@@ -1,6 +1,6 @@
 /**
- * SectionLabel — small uppercase heading used to introduce content sections.
- * Keeps the visual hierarchy clear without adding weight.
+ * SectionLabel — micro-label per design.md §4 "Micro Label (uppercase)".
+ * CursorGothic 10px / 600 / 0.6px tracking / uppercase.
  */
 import { cn } from "@/lib/utils/cn";
 
@@ -14,11 +14,12 @@ export function SectionLabel({ children, className, id }: SectionLabelProps) {
   return (
     <p
       id={id}
-      className={cn(
-        "text-[11px] font-semibold uppercase tracking-widest",
-        className
-      )}
-      style={{ color: "var(--text-tertiary)" }}
+      className={cn("text-[10px] font-semibold uppercase", className)}
+      style={{
+        color: "var(--ink-muted)",
+        fontFamily: "var(--font-display)",
+        letterSpacing: "0.6px",
+      }}
     >
       {children}
     </p>

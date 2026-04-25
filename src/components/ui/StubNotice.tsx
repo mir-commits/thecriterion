@@ -39,9 +39,12 @@ export function StubNotice({ type, className }: StubNoticeProps) {
       role="note"
       aria-label="Content notice"
       style={{
-        backgroundColor: "var(--signal-debated-bg)",
-        borderColor: "var(--signal-debated)30",
-        color: "var(--signal-debated)",
+        backgroundColor: "var(--divergence-yellow-tint)",
+        borderColor: "color-mix(in srgb, var(--divergence-yellow) 20%, transparent)",
+        borderLeftWidth: "3px",
+        borderLeftColor: "var(--divergence-yellow)",
+        color: "var(--divergence-yellow)",
+        fontFamily: "var(--font-display)",
       }}
     >
       <AlertTriangle size={14} className="flex-shrink-0 mt-0.5" />
